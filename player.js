@@ -10,7 +10,7 @@ var player = function (name) {
         name: name,
         health: 100 + stat.strength,
         stats: stat,
-        defence: 0,
+        defence: 5 + stat.dexterity,
         weapon: "sword",
         experience: xp, 
         level: 1
