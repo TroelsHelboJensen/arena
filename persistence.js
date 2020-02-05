@@ -11,11 +11,13 @@ var save = function (player) {
 }
 
 var load = function () {
-    var rawdata = fs.readFileSync('save.json');
-    var savegame = JSON.parse(rawdata);
+    if (fs.existsSync('save.json')) {
+    
+        var rawdata = fs.readFileSync('save.json');
+        var savegame = JSON.parse(rawdata);
 
-    if (savegame != null && savegame != undefined) { return savegame.player; }
-
+        if (savegame != null && savegame != undefined) { return savegame.player; }
+    }
     return null;
 }
 
