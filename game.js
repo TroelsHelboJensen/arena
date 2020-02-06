@@ -4,7 +4,6 @@ var dice = require('./dice.js');
 var persistence = require('./persistence.js');
 
 var p = persistence.load();
-var p = null;
 
 var player = build.player("Troels");
 player.weapon = sword;
@@ -72,15 +71,32 @@ async function arena(player, enemy) {
 
         if (player.health < 1) break;
     }
+    
+    if (enemy.health < 1) {
+        player.experience += enemy.experience * 2,045;
+        if (player.experience > 100 * Math.pow(player.level,2))
+            player.level++;
 
+        if (player.level % 5 == 0) {
+            var sum = dice.result(3);
+            if (sum == 1)
+                player.stats.strength++;
+            else if (sum == 2)
+                player.stats.dexterity++;
+            else
+                player.stats.intelligence++;
+            
+        }
+        persistence.save(player);
+    }
     /*
-    1. Hvis enemy dør så får player xp
-    2. Experience fra enemy gange dit level gange 2,045
-    3. level 1 = 100 * 1^2 xp, 100 * 2^2 xp, 100 * 3^2 xp
-    4. hvis du har nok xp så stig et level
-    5. Hvert 5 level får man +1 til en random stat
-    6. Gem progress
-    7. Hvis player dør så er spillet slut
+        1. Hvis enemy dør så får player xp
+        2. Experience fra enemy gange dit level gange 2,045
+        3. level 1 = 100 * 1^2 xp, 100 * 2^2 xp, 100 * 3^2 xp
+        4. hvis du har nok xp så stig et level
+        5. Hvert 5 level får man +1 til en random stat
+        6. Gem progress
+        7. Hvis player dør så er spillet slut
     */
     
     process.exit();
