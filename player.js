@@ -1,10 +1,10 @@
 var stats = require('./stats');
 
-var player = function (name) {
+var player = function (name, level) {
     var stat = stats.stats();
     var xp = 0;
     if (name == "Enemy"){
-        xp = 10;
+        xp = 55 * level;
     }
     return {
         name: name,
@@ -13,7 +13,10 @@ var player = function (name) {
         defence: 5 + stat.dexterity,
         weapon: "sword",
         experience: xp, 
-        level: 1
+        level: 1,
+        energy: 100,
+        originalEnergy: 100,
+        originalHealth: 100 + stat.strength
     }
 }
 
