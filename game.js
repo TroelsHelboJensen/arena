@@ -12,7 +12,7 @@ if (p != null) {
     player = p;
 }
 
-var enemy = build.player("Enemy");
+var enemy = build.player("Enemy", player.level);
 enemy.weapon = sword;
 //console.log(enemy);
 
@@ -34,15 +34,20 @@ async function arena(player, enemy) {
     5. Gentag men byt om på hvem der angriber og 
             forsvarer
     */
-
+    var rounds = 1;
     while(true) {
-        console.log("press any key to start first round1");
+        
+        console.log("Press any key to start round " + rounds);
         await keypress();
         
         //----------------------------------------------------------------------------------------------------------------
         // Players Angreb
         //----------------------------------------------------------------------------------------------------------------
-        var angreb = dice.result(20) + player.weapon.damage + player.stats.strength;
+        var energy = await energiAngreb(player);
+        var enhancedAttack = energy / 100 + 1;
+        player.energy -= energy;
+
+        var angreb = (dice.result(20) + player.weapon.damage + player.stats.strength) * enhancedAttack;
         var defence = dice.result(20) + enemy.defence;
         console.log(player.name + "'s angreb er " + angreb + " : " + enemy.name + "'s forsvar er " + defence);
         console.log("Resultatet = " + (angreb-defence));
@@ -51,12 +56,12 @@ async function arena(player, enemy) {
         if (result < 0) result = 0;
 
         enemy.health -= result;
-        console.log(enemy.name + "'s health: " + enemy.health);
+        console.log(enemy.name + "'s health: " + enemy.health + "\n");
         
         if (enemy.health < 1) break;
 
         //----------------------------------------------------------------------------------------------------------------
-        // Enemies angreb
+        // Enemies Angreb
         //----------------------------------------------------------------------------------------------------------------
         var angreb = dice.result(20) + enemy.weapon.damage + enemy.stats.strength;
         var defence = dice.result(20) + player.defence;
@@ -67,9 +72,14 @@ async function arena(player, enemy) {
         if (result < 0) result = 0;
         
         player.health -= result;
-        console.log(player.name + "'s health: " + player.health);
+        console.log(player.name + "'s health: " + player.health + "\n");
 
         if (player.health < 1) break;
+
+        // Generate some energy again if player energy is not max
+        if (player.energy < 100) player.energy += 7; 
+        
+        rounds += 1;
     }
     
     if (enemy.health < 1) {
@@ -87,6 +97,8 @@ async function arena(player, enemy) {
                 player.stats.intelligence++;
             
         }
+        player.energy = player.originalEnergy;
+        player.health = player.originalHealth;
         persistence.save(player);
     }
     /*
@@ -108,6 +120,25 @@ const keypress = async () => {
       process.stdin.setRawMode(false)
       resolve()
     }))
+}
+
+const energiAngreb = async (player) => {
+
+    var energy = 0;
+    console.log("Du har så meget energi tilbage " + player.energy);
+    // Prompt user to input data in console.
+    console.log("Hvor meget energi vil du bruge i dit angreb?");
+    return new Promise(resolve => process.stdin.once('data', (data) => {
+        // User input exit.
+        if(!isNaN(data))
+            if (player.energy <= data) 
+            {
+                energy = data;
+                runnnig = false;
+            }
+        
+        resolve(data);
+    }));
 }
 
 arena(player, enemy);
